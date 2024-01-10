@@ -1,0 +1,8 @@
+packages:
+    - name: djed-dash
+      functions:
+        - name: get-data
+          runtime: python:default
+          web: false
+          environment: 
+            BLOCKFROST_API_KEY: "mainnetYXpeV3KNdSXwkWVTsc5b2szE7Z7cnlWB"

@@ -1,0 +1,18 @@
+[
+  {
+    "apihost": "https://faas-syd1-c274eac6.doserverless.co",
+    "namespace": "fn-083d8fca-6cb0-422d-8f8f-2475d64c61fa",
+    "packageVersions": {
+      "djed-dash": {
+        "version": "0.0.20",
+        "digest": "204b6347d8caa6d5641eba106d7f8c846dad922d0c8c4f73712fce3eee24eb89"
+      }
+    },
+    "actionVersions": {
+      "djed-dash/get-data": {
+        "version": "0.0.14",
+        "digest": "03bfb81b7f183b141b376a9723a07bc250249e95609798512f8ae18aa6fadacf"
+      }
+    }
+  }
+]
