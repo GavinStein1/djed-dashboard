@@ -9,10 +9,7 @@ interface ChartProps {
     title: string;
 }
 
-const TimeSeriesChart: React.FC<ChartProps> = ({ xSeries, ySeries, title }) => {
-    console.log(title);
-    console.log(ySeries);
-    
+const TimeSeriesChart: React.FC<ChartProps> = ({ xSeries, ySeries, title }) => {    
     const state = {
       
         series: [{

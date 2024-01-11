@@ -1,10 +1,13 @@
 import os
 import requests
+import jwt
+import datetime
 from blockfrost import BlockFrostApi, ApiUrls
-from .firebase import get_access_token
 
 # CONSTANTS
 blockfrost_api_key = os.environ.get("BLOCKFROST_API_KEY")
+firebase_secret = os.environ.get("FIREBASE_SECRET_KEY")
+service_account_email = os.environ.get("SERVICE_ACCOUNT_EMAIL")
 
 shen_id = "8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd615368656e4d6963726f555344"
 djed_id = "8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd61446a65644d6963726f555344"
@@ -18,6 +21,39 @@ api = BlockFrostApi(
 )
 
 # FUNCTIONS
+def create_signed_jwt():
+    # Set the expiration time for the token (adjust as needed)
+    expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    iat = datetime.datetime.utcnow()
+
+    # Build the JWT payload
+    jwt_payload = {
+        "exp": expiration_time,
+        "iat": iat,
+        "iss": service_account_email,
+        "scope": "https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email",
+        "aud": "https://oauth2.googleapis.com/token"
+    }
+
+    # Create and sign the JWT
+    jwt_token = jwt.encode(jwt_payload, firebase_secret, algorithm="RS256")
+
+    return jwt_token
+
+def get_access_token():
+    jwt = create_signed_jwt()
+    url = "https://oauth2.googleapis.com/token"
+    form_data = {
+        "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+        "assertion": jwt
+    }
+
+    response = requests.post(url, data=form_data)
+    if response.status_code != 200:
+        raise Exception
+    
+    return response.json()["access_token"]
+
 def get_init_data():
     try:
         url = "https://djed-dash-default-rtdb.asia-southeast1.firebasedatabase.app/init_data.json"
@@ -88,10 +124,12 @@ def get_cardano_price():
         return None
 
 def get_data():
+    data_ctr = 0
     init_data = get_init_data()
-    page = init_data["page"]
+    starting_page = init_data["page"]
     latest_timestamp = init_data["latest_timestamp"]
     ada_price = get_cardano_price()
+    page = starting_page
     transactions = api.address_transactions(reserve_addr, page=page)
     while len(transactions) > 0:   
         for t in transactions:
@@ -114,11 +152,16 @@ def get_data():
                 
                 # Write to firebase database
                 write_data(save_data, str(timestamp))
+                data_ctr += 1
 
         page += 1
         transactions = api.address_transactions(reserve_addr, page=page)
+    if page == starting_page:
         write_init_data(timestamp, page)
+    else:
+        write_init_data(timestamp, page-1)
+    return data_ctr
 
 def main(args):
-    get_data()
-    return { "body": "executed" }
+    data_ctr = get_data()
+    return { "body": "executed - {} timestamps added.".format(data_ctr) }

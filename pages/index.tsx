@@ -37,6 +37,8 @@ export default function Home() {
   const [equitySeriesData, setEquitySeriesData] = useState([]);
   const currentTimestamp = Math.floor(Date.now() / 1000);
 
+  const disclaimer = "While the utmost care has been taken to compile the data displayed here, there is no guarantee that the data is up to date or accurate. This site was put together as a pet project. Please do not make financial decisions based on this data alone, and do your own research."
+
   let formatCurrency = Intl.NumberFormat();
 
   useEffect(() => {
@@ -115,78 +117,45 @@ export default function Home() {
       <div>
         <NavbarComponent />
         <div className="margin20">
-          <Tabs aria-label="Options">
-            <Tab key="price-data" title="Price Data">
-              <div className="margin20 grid grid-cols-1">
-                <Accordion>
-                  <AccordionItem key="1" aria-label="ADA Price" title="ADA Price">
-                    <CardComponent 
-                      dataGroup='Price Data'
-                      dataName='ADA Price' 
-                      dataValue={"$" + formatCurrency.format(adaPrice)}
-                      hasChart={true}
-                      chartXData={helper.convertUnixTimestampsToDateStrings(xDataSeries)}
-                      chartYData={adaChart}
-                    />
-                  </AccordionItem>
-                  <AccordionItem key="2" aria-label="Djed Price" title="Djed Price">
-                    <CardComponent
-                      dataGroup='Price Data'
-                      dataName='Djed Price'
-                      dataValue={"₳" + formatCurrency.format(djedPrice)}
-                      hasChart={true}
-                      chartXData={helper.convertUnixTimestampsToDateStrings(xDataSeries)}
-                      chartYData={djedChart}
-                    />
-                  </AccordionItem>
-                  <AccordionItem key="3" aria-label="Shen Price" title="Shen Price">
-                    <CardComponent
-                      dataGroup='Price Data'
-                      dataName='Shen Price'
-                      dataValue={"₳" + formatCurrency.format(shenPrice)}
-                      hasChart={true}
-                      chartXData={helper.convertUnixTimestampsToDateStrings(xDataSeries)}
-                      chartYData={shenChart}
-                    />
-                  </AccordionItem>
-                </Accordion>
+          
+          <div className="container">
+            <div className="first-div">
+              <div className="regular-text width-75">
+                <p className="white margin20">{disclaimer}</p>
               </div>
-            </Tab>
-            <Tab key="reserve-data" title="Reserve Data">
-              <Accordion>
-                <AccordionItem key="1" aria-label="Reserves" title="Reserves">
-                  <CardComponent
-                    dataGroup='Reserve Data'
-                    dataName='Reserves'
-                    dataValue={"₳" + formatCurrency.format(reserve)}
-                    hasChart={true}
-                    chartXData={helper.convertUnixTimestampsToDateStrings(xDataSeries)}
-                    chartYData={reserveChart}
-                  />
-                </AccordionItem>
-                <AccordionItem key="2" aria-label="Liabilities" title="Liabilities">
-                  <CardComponent
-                    dataGroup='Reserve Data'
-                    dataName='Liabilities'
-                    dataValue={"₳" + formatCurrency.format(liabilities)}
-                    hasChart={true}
-                    chartXData={helper.convertUnixTimestampsToDateStrings(xDataSeries)}
-                    chartYData={liabilitiesChart}
-                  />
-                </AccordionItem>
-                <AccordionItem key="3" aria-label="Equity" title="Equity">
-                  <CardComponent
-                    dataGroup='Reserve Data'
-                    dataName='Equity'
-                    dataValue={"₳" + formatCurrency.format(equity)}
-                    hasChart={true}
-                    chartXData={helper.convertUnixTimestampsToDateStrings(xDataSeries)}
-                    chartYData={equityChart}
-                  />
-                  </AccordionItem>
-              </Accordion>
-            </Tab>
-          </Tabs>
+              <div className="grid grid-cols-2 align-center">
+                <div className="color-background rounded-corners">
+                  <p className="small-heading margin10 align-left">Reserve Health</p>
+                  <p className="small-display-text margin10 bold">{String((ratio*100).toFixed(0)) + "%"}</p>
+                  <p className="small-heading margin10 align-left">Reserves</p>
+                  <p className="small-display-text margin10">{"₳" + formatCurrency.format(reserve)}</p>
+                  <p className="small-heading margin10 align-left">Liabilities</p>
+                  <p className="small-display-text margin10">{"₳" + formatCurrency.format(liabilities)}</p>
+                  <p className="small-heading margin10 align-left">Equity</p>
+                  <p className="small-display-text margin10">{"₳" + formatCurrency.format(equity)}</p>
+                </div>
+                {createPieChart(liabilities, equity)}
+              </div>
+            </div>
+            <div className="second-div">
+              <div className="small-card">
+                <p className="small-heading margin10 align-left">ADA</p>
+                <p className="small-display-text margin10 bold">{"$" + formatCurrency.format(adaPrice)}</p>
+              </div>
+              <div className="small-card">
+                <p className="small-heading margin10 align-left">Djed Stablecoin</p>
+                <p className="small-display-text margin10 bold">{"₳" + formatCurrency.format(djedPrice)}</p>
+                <p className="small-heading margin10 align-left">Circulating</p>
+                <p className="small-display-text margin10 bold">{formatCurrency.format(circulatingDjed)}</p>
+              </div>
+              <div className="small-card">
+                <p className="small-heading margin10 align-left">Shen Reservecoin</p>
+                <p className="small-display-text margin10 bold">{"₳" + formatCurrency.format(shenPrice)}</p>
+                <p className="small-heading margin10 align-left">Circulating</p>
+                <p className="small-display-text margin10 bold">{formatCurrency.format(circulatingShen)}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -207,7 +176,7 @@ function processData(json_data: Record<number, SeriesData>): ChartData {
 }
 
 function createPieChart(liabilities: number | undefined, equity: number | undefined) {
-  if (!liabilities || ! equity) {
+  if (!liabilities || !equity) {
     return (
       <p>No data for chart</p>
     )
@@ -215,18 +184,27 @@ function createPieChart(liabilities: number | undefined, equity: number | undefi
   var state = { 
     series: [liabilities, equity],
     options: {
-      labels: ['Liabilities', 'Equity']
+      labels: ['Liabilities', 'Equity'],
+      legend: {
+        position: 'bottom' as const
+      },
+      tooltip: {
+        y: {
+          formatter: function (val: number) {
+            return Intl.NumberFormat().format(val);
+          }
+        }
+      }
     },
   };
   return (
     <div className='flex justify-center'>
-      <h2>Reserve Constitution</h2>
       {(typeof window !== 'undefined') &&
         <Chart
           options={state.options}
           series={state.series}
           type="pie"
-          width="500"
+          height="100%"
         />
       }
     </div>

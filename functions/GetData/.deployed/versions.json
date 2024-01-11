@@ -4,14 +4,14 @@
     "namespace": "fn-083d8fca-6cb0-422d-8f8f-2475d64c61fa",
     "packageVersions": {
       "djed-dash": {
-        "version": "0.0.20",
+        "version": "0.0.26",
         "digest": "204b6347d8caa6d5641eba106d7f8c846dad922d0c8c4f73712fce3eee24eb89"
       }
     },
     "actionVersions": {
       "djed-dash/get-data": {
-        "version": "0.0.14",
-        "digest": "03bfb81b7f183b141b376a9723a07bc250249e95609798512f8ae18aa6fadacf"
+        "version": "0.0.20",
+        "digest": "407e8e2dc08294377ddadd6cdb34eb6f854750f51ec03ab9297f1600f713f8ff"
       }
     }
   }

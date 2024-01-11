@@ -20,7 +20,7 @@ const CardComponent: React.FC<MyComponentProps> = ({ dataName, dataValue, dataGr
           <CardBody className="overflow-visible py-2">
             {dataValue}
           </CardBody>
-          <TimeSeriesChart xSeries={chartXData} ySeries={chartYData} title={dataName}/>
+          {/* <TimeSeriesChart xSeries={chartXData} ySeries={chartYData} title={dataName}/> */}
         </Card>
     )
 }
