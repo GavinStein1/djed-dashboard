@@ -1,9 +1,11 @@
 import os
 import requests
 from blockfrost import BlockFrostApi, ApiUrls
+from .firebase import get_access_token
 
 # CONSTANTS
 blockfrost_api_key = os.environ.get("BLOCKFROST_API_KEY")
+
 shen_id = "8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd615368656e4d6963726f555344"
 djed_id = "8db269c3ec630e06ae29f74bc39edd1f87c819f1056206e879a1cd61446a65644d6963726f555344"
 reserve_addr = "addr1zxem3j9xw7gyqnry0mfdhku7grrzu0707dc9fs68zwkln5sm5kjdmrpmng059yellupyvwgay2v0lz6663swmds7hp0qul0eqc"
@@ -33,7 +35,11 @@ def get_init_data():
 def write_data(data, timestamp: str) -> int:
     try:
         url = "https://djed-dash-default-rtdb.asia-southeast1.firebasedatabase.app/raw_data/" + timestamp + ".json"
-        response = requests.put(url, json=data)
+        access_token = get_access_token()
+        headers = {
+            "Authorization": "Bearer {}".format(access_token)
+        }
+        response = requests.put(url, json=data, headers=headers)
         if response.status_code != 200:
             raise Exception
         return 0
@@ -43,11 +49,15 @@ def write_data(data, timestamp: str) -> int:
 def write_init_data(timestamp, page):
     try:
         url = "https://djed-dash-default-rtdb.asia-southeast1.firebasedatabase.app/init_data.json"
+        access_token = get_access_token()
+        headers = {
+            "Authorization": "Bearer {}".format(access_token)
+        }
         init_data = {
             "page": page,
             "latest_timestamp": timestamp
         }
-        response = requests.put(url, json=init_data)
+        response = requests.put(url, json=init_data, headers=headers)
         if response.status_code != 200:
             raise Exception
     except:
@@ -109,11 +119,6 @@ def get_data():
         transactions = api.address_transactions(reserve_addr, page=page)
         write_init_data(timestamp, page)
 
-    
-
-
 def main(args):
     get_data()
     return { "body": "executed" }
-
-print(main(0))
