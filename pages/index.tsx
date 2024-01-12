@@ -1,17 +1,13 @@
 "use client"
 
-import { Inter } from 'next/font/google'
 import { useEffect, useState } from 'react'
-import {CircularProgress, Tabs, Tab, Accordion, AccordionItem} from "@nextui-org/react";
+import { CircularProgress } from "@nextui-org/react";
 import dynamic from 'next/dynamic';
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 import NavbarComponent from '@/components/navbar'
 import CardComponent from '@/components/card'
 import * as helper from '@/script/helper';
-import ReactApexChart from 'react-apexcharts';
-
-const inter = Inter({ subsets: ['latin'] })
 
 interface SeriesData {
   block: number;
@@ -29,28 +25,29 @@ interface ChartData {
 export default function Home() {
   const [data, setData] = useState<ChartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [adaPriceSeriesData, setAdaPriceSeriesData] = useState([]);
-  const [djedPriceSeriesData, setDjedPriceSeriesData] = useState([]);
-  const [shenPriceSeriesData, setShenPriceSeriesData] = useState([]);
-  const [reserveSeriesData, setReserveSeriesData] = useState([]);
-  const [liabilitiesSeriesData, setLiabilitiesSeriesData] = useState([]);
-  const [equitySeriesData, setEquitySeriesData] = useState([]);
   const currentTimestamp = Math.floor(Date.now() / 1000);
+  const [liveAdaPrice, setLiveAdaPrice] = useState<number>();
 
-  const disclaimer = "While the utmost care has been taken to compile the data displayed here, there is no guarantee that the data is up to date or accurate. This site was put together as a pet project. Please do not make financial decisions based on this data alone, and do your own research."
+  const disclaimer = "While the utmost care has been taken to compile the data displayed here, there is no guarantee that the data is up to date or accurate. This site was put together as a pet project. Please do not make financial decisions based on this data alone, and do your own research. For information on how the data was compiled, please use the tooltips (coming soon...)."
 
   let formatCurrency = Intl.NumberFormat();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const response = await fetch("api/blockfrost");
-        const response = await fetch("api/firebase");
-        if (!response.ok) {
-          throw Error("Request failed with status ${response.status}");
+        // Get Firebase Realtime Database data
+        const firebaseJson = await fetchFirebaseData();
+        setData(processData(firebaseJson));
+
+        // Get live ADA price
+        const url = "https://api.coingecko.com/api/v3/simple/price?ids=cardano&vs_currencies=usd";
+        const ada_response = await fetch(url);
+        if (ada_response.status != 200) {
+            setLiveAdaPrice(0.0);
+        } else {
+            const json = await ada_response.json();
+            setLiveAdaPrice(json["cardano"]["usd"]);
         }
-        const firebaseData = await response.json();
-        setData(processData(firebaseData));
         setIsLoading(false);
       } catch (error) {
         console.log(error);
@@ -68,91 +65,56 @@ export default function Home() {
       </div>
     )
   } else {
-    if (!data) {
+    if (!data || !liveAdaPrice) {
       return (
         <div>
-          <p>no data exists</p>
+          <p>Error compiling data</p>
         </div>
       )
     }
     const latest = data.y[data.y.length - 1];
     const circulatingDjed = helper.calculateCirculating(latest.djed_reserve);
     const circulatingShen = helper.calculateCirculating(latest.shen_reserve);
-    const adaPrice = latest.ada_price;
+    const adaPrice = liveAdaPrice;
     const reserve = latest.ada_reserve / 10**6;
     const djedPrice = helper.scPrice(latest.djed_reserve, latest.ada_reserve, adaPrice);
     const liabilities = helper.calculateLiabilities(circulatingDjed, djedPrice);
     const equity = helper.calculateEquity(liabilities, reserve);
     const shenPrice = helper.rcPrice(latest.shen_reserve, equity);
     const ratio = helper.calculateRatio(reserve, liabilities);
-    var adaChart: number[] = [];
-    var djedChart: number[] = [];
-    var shenChart: number[] = [];
-    var reserveChart: number[] = [];
-    var liabilitiesChart: number[] = [];
-    var equityChart: number[] = [];
-    var xDataSeries = [];
     const last30 = computeLast30Days(data, currentTimestamp);
-    var i = last30.x.length - 1;
-    while (i > 0) {
-      var adaTemp = last30.y[i].ada_price;
-      var circulatingDjedTemp = helper.calculateCirculating(last30.y[i].djed_reserve);
-      var circulatingShenTemp = helper.calculateCirculating(last30.y[i].shen_reserve);
-      var reserveTemp = last30.y[i].ada_reserve / 10**6;
-      var djedPriceTemp = helper.scPrice(last30.y[i].djed_reserve, last30.y[i].ada_reserve, adaTemp);
-      var liabilitiesTemp = helper.calculateLiabilities(circulatingDjedTemp, djedPriceTemp);
-      var equityTemp = helper.calculateEquity(liabilitiesTemp, reserveTemp);
-      var shenPriceTemp = helper.rcPrice(last30.y[i].shen_reserve, equityTemp);
-      adaChart.push(adaTemp);
-      djedChart.push(djedPriceTemp);
-      shenChart.push(shenPriceTemp);
-      reserveChart.push(reserveTemp);
-      liabilitiesChart.push(liabilitiesTemp);
-      equityChart.push(equityTemp);
-      xDataSeries.push(last30.x[i]);
-      i = i - 1;
-    }
     
     return (
       <div>
         <NavbarComponent />
         <div className="margin20">
-          
+          <div className="regular-text container padding-20">
+            <p className="">{disclaimer}</p>
+          </div>
           <div className="container">
-            <div className="first-div">
-              <div className="regular-text width-75">
-                <p className="white margin20">{disclaimer}</p>
-              </div>
-              <div className="grid grid-cols-2 align-center">
-                <div className="color-background rounded-corners">
-                  <p className="small-heading margin10 align-left">Reserve Health</p>
-                  <p className="small-display-text margin10 bold">{String((ratio*100).toFixed(0)) + "%"}</p>
-                  <p className="small-heading margin10 align-left">Reserves</p>
-                  <p className="small-display-text margin10">{"₳" + formatCurrency.format(reserve)}</p>
-                  <p className="small-heading margin10 align-left">Liabilities</p>
-                  <p className="small-display-text margin10">{"₳" + formatCurrency.format(liabilities)}</p>
-                  <p className="small-heading margin10 align-left">Equity</p>
-                  <p className="small-display-text margin10">{"₳" + formatCurrency.format(equity)}</p>
-                </div>
-                {createPieChart(liabilities, equity)}
-              </div>
-            </div>
             <div className="second-div">
-              <div className="small-card">
-                <p className="small-heading margin10 align-left">ADA</p>
-                <p className="small-display-text margin10 bold">{"$" + formatCurrency.format(adaPrice)}</p>
-              </div>
-              <div className="small-card">
-                <p className="small-heading margin10 align-left">Djed Stablecoin</p>
-                <p className="small-display-text margin10 bold">{"₳" + formatCurrency.format(djedPrice)}</p>
-                <p className="small-heading margin10 align-left">Circulating</p>
-                <p className="small-display-text margin10 bold">{formatCurrency.format(circulatingDjed)}</p>
-              </div>
-              <div className="small-card">
-                <p className="small-heading margin10 align-left">Shen Reservecoin</p>
-                <p className="small-display-text margin10 bold">{"₳" + formatCurrency.format(shenPrice)}</p>
-                <p className="small-heading margin10 align-left">Circulating</p>
-                <p className="small-display-text margin10 bold">{formatCurrency.format(circulatingShen)}</p>
+              <CardComponent header1='' header2='ADA' bodyValue={"$" + formatCurrency.format(adaPrice)}>
+              </CardComponent>
+              <CardComponent header1='' header2='Djed' bodyValue={"₳" + formatCurrency.format(djedPrice)}>
+                <p>Circulating</p>
+                <p className="child-padding">{formatCurrency.format(circulatingDjed)}</p>
+              </CardComponent>
+              <CardComponent header1='' header2='Shen' bodyValue={"₳" + formatCurrency.format(shenPrice)}>
+                <p>Circulating</p>
+                <p className="child-padding">{formatCurrency.format(circulatingShen)}</p>
+              </CardComponent>
+            </div>
+            <div className="first-div">
+              <div className="grid grid-cols-2">
+                {createPieChart(liabilities, equity)}
+                <CardComponent header2="Reserve Health" header1="" bodyValue={String((ratio*100).toFixed(0)) + "%"}>
+                  <p className="bold">Reserves</p>
+                  <p className="child-padding">{"₳" + formatCurrency.format(reserve)}</p>
+                  <p className="bold">Liabilities</p>
+                  <p className="child-padding">{"₳" + formatCurrency.format(liabilities)}</p>
+                  <p className="bold">Equity</p>
+                  <p className="child-padding">{"₳" + formatCurrency.format(equity)}</p>
+                </CardComponent>
               </div>
             </div>
           </div>
@@ -198,7 +160,7 @@ function createPieChart(liabilities: number | undefined, equity: number | undefi
     },
   };
   return (
-    <div className='flex justify-center'>
+    <div className='flex justify-center padding-pie-chart'>
       {(typeof window !== 'undefined') &&
         <Chart
           options={state.options}
@@ -209,78 +171,6 @@ function createPieChart(liabilities: number | undefined, equity: number | undefi
       }
     </div>
   );
-}
-
-function createLineChart(data: number[], xData: number[], title: string) {
-  const state = {
-    series: [{
-      name: title,
-      data: {
-        x: xData,
-        y: data
-      }
-    }],
-    options: {
-      chart: {
-        type: "area" as const,
-        stacked: false,
-        height: 350,
-        zoom: {
-          type: 'x' as const,
-          enabled: true,
-          autoScaleYaxis: true
-        },
-        toolbar: {
-          autoSelected: 'zoom' as const
-        }
-      },
-      dataLabels: {
-        enabled: false
-      },
-      markers: {
-        size: 0,
-      },
-      title: {
-        text: title,
-        align: 'left' as const
-      }, 
-      fill: {
-        type: 'gradient' as const,
-        gradient: {
-          shadeIntensity: 1,
-          inverseColors: false,
-          opacityFrom: 0.5,
-          opacityTo: 0,
-          stops: [0, 90, 100]
-        },
-      },
-      yaxis: {
-        labels: {
-          formatter: function (val: number) {
-            return (val / 1000000).toFixed(0);
-          },
-        },
-      },
-      xaxis: {
-        type: 'datetime' as const,
-      },
-      tooltip: {
-        shared: false,
-        y: {
-          formatter: function (val: number) {
-            return (val / 1000000).toFixed(0)
-          }
-        }
-      }
-    }
-  }
-
-  return (
-    <div id="chart">
-      {/* <Chart options={state.options} series={state.series} type="area" height={350} /> */}
-      <p>CHART</p>
-    </div>
-  )
 }
 
 function computeLast30Days(data: ChartData, currentTimestamp: number): ChartData {
@@ -302,4 +192,14 @@ function computeLast30Days(data: ChartData, currentTimestamp: number): ChartData
     x,
     y
   };
+}
+
+async function fetchFirebaseData() {
+  const response = await fetch("https://djed-dash-default-rtdb.asia-southeast1.firebasedatabase.app/raw_data.json");
+  if (response.status != 200) {
+    return null;
+  } else {
+    const jsonData = await response.json();
+    return jsonData;
+  }
 }

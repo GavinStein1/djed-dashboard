@@ -26,9 +26,9 @@ export default function NavbarComponent() {
   return (
   <Navbar className="">
     <NavbarBrand>
-      <h1 className="foreground-color">DJED Dashboard</h1>
+      <h1 className="">DJED Dashboard</h1>
     </NavbarBrand>
-    <NavbarContent className="hidden sm:flex gap-4 foreground-color" justify="center">
+    <NavbarContent className="hidden sm:flex gap-4" justify="center">
       <NavbarItem isActive={(pathname !== "/")}>
         <Link href="/">
           Overview
@@ -42,11 +42,41 @@ export default function NavbarComponent() {
     </NavbarContent>
     <NavbarContent justify="end">
       <NavbarItem>
-        <Button as={Link} className="white color-background" href="#" variant="flat">
+        <Button variant="solid" onClick={downloadJsonData}>
           Download data
         </Button>
       </NavbarItem>
     </NavbarContent>
   </Navbar>
   )
+}
+
+async function downloadJsonData() {
+  // Get data from DB
+  const response = await fetch("https://djed-dash-default-rtdb.asia-southeast1.firebasedatabase.app/raw_data.json");
+
+  if (response.status != 200) {
+    return;
+  }
+
+  const jsonData = await response.json();
+  // Convert JSON to string
+  const jsonString = JSON.stringify(jsonData, null, 2);
+
+  // Create a Blob with the JSON data
+  const blob = new Blob([jsonString], { type: 'application/json' });
+
+  // Create a download link
+  const downloadLink = document.createElement('a');
+  downloadLink.href = URL.createObjectURL(blob);
+  downloadLink.download = "Djed_Dashboard_Raw_Data.json";
+
+  // Append the link to the body
+  document.body.appendChild(downloadLink);
+
+  // Trigger the download
+  downloadLink.click();
+
+  // Remove the link from the body
+  document.body.removeChild(downloadLink);
 }

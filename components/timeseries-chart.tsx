@@ -4,12 +4,21 @@ import dynamic from 'next/dynamic';
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 interface ChartProps {
-    xSeries: string[];
-    ySeries: number[];
-    title: string;
+  xSeries: string[];
+  ySeries: number[];
+  title: string;
 }
 
-const TimeSeriesChart: React.FC<ChartProps> = ({ xSeries, ySeries, title }) => {    
+interface StackedChartProps {
+  xSeries: string[];
+  ySeriesA: number[];
+  ySeriesB: number[];
+  title: string;
+  titleA: string;
+  titleB: string;
+}
+
+export const TimeSeriesChart: React.FC<ChartProps> = ({ xSeries, ySeries, title }) => {    
     const state = {
       
         series: [{
@@ -20,7 +29,7 @@ const TimeSeriesChart: React.FC<ChartProps> = ({ xSeries, ySeries, title }) => {
           chart: {
             type: 'area' as const,
             stacked: false,
-            height: 350,
+            height: 500,
             zoom: {
               type: 'x' as const,
               enabled: true,
@@ -34,13 +43,13 @@ const TimeSeriesChart: React.FC<ChartProps> = ({ xSeries, ySeries, title }) => {
             enabled: false
           },
           markers: {
-            size: 0,
+            size: 0
           },
           fill: {
             type: 'gradient',
             gradient: {
-              shadeIntensity: 1,
-              inverseColors: false,
+              shadeIntensity: 0.5,
+              inverseColors: true,
               opacityFrom: 0.5,
               opacityTo: 0,
               stops: [0, 90, 100]
@@ -79,6 +88,9 @@ const TimeSeriesChart: React.FC<ChartProps> = ({ xSeries, ySeries, title }) => {
                 }
               }
             }
+          },
+          stroke: {
+            curve: 'straight' as const
           }
         },
       
@@ -86,9 +98,91 @@ const TimeSeriesChart: React.FC<ChartProps> = ({ xSeries, ySeries, title }) => {
       };
     return (
         <div id="chart">
-            <Chart options={state.options} series={state.series} type="area" height={350} />
+            <Chart options={state.options} series={state.series} type="area" height={500} />
         </div>
     )
 }
 
-export default TimeSeriesChart;
+export const StackedTimeSeriesChart: React.FC<StackedChartProps> = ({ xSeries, ySeriesA, ySeriesB, title, titleA, titleB}) => {    
+  const state = {
+    
+      series: [{
+        data: ySeriesA,
+        name: titleA
+      },{
+        data: ySeriesB,
+        name: titleB
+      }],
+      options: {
+        chart: {
+          type: 'line' as const,
+          stacked: true,
+          height: 500,
+          zoom: {
+            type: 'x' as const,
+            enabled: true,
+            autoScaleYaxis: true
+          },
+          toolbar: {
+            autoSelected: 'zoom' as const
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        markers: {
+          size: 0
+        },
+        fill: { 
+          gradient: {
+            opacityFrom: 0.5,
+            opacityTo: 0
+          }
+        },
+        yaxis: {
+          labels: {
+            formatter: function (val: number) {
+              if (val < 1000) {
+                  return val.toFixed(3);
+              } else if (val < 100000) {
+                  return val.toFixed(2);
+              } else {
+                  return val.toFixed(0);
+              }
+            },
+          },
+          title: {
+            text: title
+          },
+        },
+        xaxis: {
+          type: 'datetime' as const,
+          categories: xSeries,
+        },
+        tooltip: {
+          shared: false,
+          y: {
+            formatter: function (val: number) {
+              if (val < 1000) {
+                  return val.toFixed(3);
+              } else if (val < 100000) {
+                  return val.toFixed(2);
+              } else {
+                  return val.toFixed(0);
+              }
+            }
+          }
+        },
+        stroke: {
+          curve: 'straight' as const
+        }
+      },
+    
+    
+    };
+  return (
+      <div id="chart">
+          <Chart options={state.options} series={state.series} type="area" height={500} />
+      </div>
+  )
+}

@@ -1,26 +1,26 @@
-import {Card, CardHeader, CardBody, CardFooter} from "@nextui-org/react";
-import TimeSeriesChart from "./timeseries-chart";
+import {Card, CardHeader, CardBody} from "@nextui-org/react";
+import { ReactNode } from "react";
 
 interface MyComponentProps {
-    dataName: string;
-    dataValue: string;
-    dataGroup: string;
-    hasChart: boolean;
-    chartXData: string[];
-    chartYData: number[];
+    header2: string;
+    bodyValue: string;
+    header1: string;
+    children: ReactNode
 }
 
-const CardComponent: React.FC<MyComponentProps> = ({ dataName, dataValue, dataGroup, hasChart, chartXData, chartYData }) => {
+const CardComponent: React.FC<MyComponentProps> = ({ header2, bodyValue, header1, children }) => {
     return (
-        <Card className="py-4">
+        <Card className="py-4 margin20">
           <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-            <p className="text-tiny uppercase font-bold">{dataGroup}</p>
-            <h4 className="font-bold text-large">{dataName}</h4>
+            <p className="text-tiny uppercase font-bold">{header1}</p>
+            <h4 className="font-bold text-large">{header2}</h4>
           </CardHeader>
           <CardBody className="overflow-visible py-2">
-            {dataValue}
+            {bodyValue}
           </CardBody>
-          {/* <TimeSeriesChart xSeries={chartXData} ySeries={chartYData} title={dataName}/> */}
+          <div className="children-padding">
+            {children}
+          </div>
         </Card>
     )
 }
