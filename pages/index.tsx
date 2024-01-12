@@ -94,6 +94,7 @@ export default function Home() {
           <div className="container">
             <div className="second-div">
               <CardComponent header1='' header2='ADA' bodyValue={"$" + formatCurrency.format(adaPrice)}>
+                <div></div>
               </CardComponent>
               <CardComponent header1='' header2='Djed' bodyValue={"₳" + formatCurrency.format(djedPrice)}>
                 <p>Circulating</p>
