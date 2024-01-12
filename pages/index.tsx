@@ -1,13 +1,14 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { CircularProgress } from "@nextui-org/react";
+import { CircularProgress, Tooltip } from "@nextui-org/react";
 import dynamic from 'next/dynamic';
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 import NavbarComponent from '@/components/navbar'
 import CardComponent from '@/components/card'
 import * as helper from '@/script/helper';
+import Tooltips from '@/script/tooltips';
 
 interface SeriesData {
   block: number;
@@ -93,14 +94,14 @@ export default function Home() {
           </div>
           <div className="container">
             <div className="second-div">
-              <CardComponent header1='' header2='ADA' bodyValue={"$" + formatCurrency.format(adaPrice)}>
+              <CardComponent header1='' header2='ADA' bodyValue={"$" + formatCurrency.format(adaPrice)} tooltip={Tooltips.adaCard}>
                 <div></div>
               </CardComponent>
-              <CardComponent header1='' header2='Djed' bodyValue={"₳" + formatCurrency.format(djedPrice)}>
+              <CardComponent header1='' header2='Djed' bodyValue={"₳" + formatCurrency.format(djedPrice)} tooltip={Tooltips.djedCard}>
                 <p>Circulating</p>
                 <p className="child-padding">{formatCurrency.format(circulatingDjed)}</p>
               </CardComponent>
-              <CardComponent header1='' header2='Shen' bodyValue={"₳" + formatCurrency.format(shenPrice)}>
+              <CardComponent header1='' header2='Shen' bodyValue={"₳" + formatCurrency.format(shenPrice)} tooltip={Tooltips.shenCard}>
                 <p>Circulating</p>
                 <p className="child-padding">{formatCurrency.format(circulatingShen)}</p>
               </CardComponent>
@@ -108,13 +109,17 @@ export default function Home() {
             <div className="first-div">
               <div className="grid grid-cols-2">
                 {createPieChart(liabilities, equity)}
-                <CardComponent header2="Reserve Health" header1="" bodyValue={String((ratio*100).toFixed(0)) + "%"}>
+                <CardComponent header2="Reserve Health" header1="" bodyValue={String((ratio*100).toFixed(0)) + "%"} tooltip={Tooltips.ratio}>
                   <p className="bold">Reserves</p>
                   <p className="child-padding">{"₳" + formatCurrency.format(reserve)}</p>
                   <p className="bold">Liabilities</p>
-                  <p className="child-padding">{"₳" + formatCurrency.format(liabilities)}</p>
+                  <Tooltip content={Tooltips.liabilities}>
+                    <p className="child-padding">{"₳" + formatCurrency.format(liabilities)}</p>
+                  </Tooltip>
                   <p className="bold">Equity</p>
-                  <p className="child-padding">{"₳" + formatCurrency.format(equity)}</p>
+                  <Tooltip content={Tooltips.equity}>
+                    <p className="child-padding">{"₳" + formatCurrency.format(equity)}</p>
+                  </Tooltip>
                 </CardComponent>
               </div>
             </div>

@@ -1,14 +1,15 @@
-import {Card, CardHeader, CardBody} from "@nextui-org/react";
+import {Card, CardHeader, CardBody, Tooltip} from "@nextui-org/react";
 import { ReactNode } from "react";
 
 interface MyComponentProps {
     header2: string;
     bodyValue: string;
     header1: string;
+    tooltip: string;
     children: ReactNode
 }
 
-const CardComponent: React.FC<MyComponentProps> = ({ header2, bodyValue, header1, children }) => {
+const CardComponent: React.FC<MyComponentProps> = ({ header2, bodyValue, header1, tooltip, children }) => {
     return (
         <Card className="py-4 margin20">
           <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
@@ -16,7 +17,15 @@ const CardComponent: React.FC<MyComponentProps> = ({ header2, bodyValue, header1
             <h4 className="font-bold text-large">{header2}</h4>
           </CardHeader>
           <CardBody className="overflow-visible py-2">
-            {bodyValue}
+            {tooltip !== "" ? (
+              <Tooltip content={tooltip}>
+                {bodyValue}
+              </Tooltip>
+            ): (
+              <div>
+                {bodyValue}
+              </div>
+            )}
           </CardBody>
           <div className="children-padding">
             {children}
