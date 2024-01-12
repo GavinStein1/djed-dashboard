@@ -26,7 +26,9 @@ export default function NavbarComponent() {
   return (
   <Navbar className="">
     <NavbarBrand>
-      <h1 className="">DJED Dashboard</h1>
+      <Link href="/">
+        <h1 className="">DJED Dashboard</h1>
+      </Link>
     </NavbarBrand>
     <NavbarContent className="hidden sm:flex gap-4" justify="center">
       <NavbarItem isActive={(pathname !== "/")}>

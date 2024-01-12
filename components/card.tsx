@@ -19,7 +19,7 @@ const CardComponent: React.FC<MyComponentProps> = ({ header2, bodyValue, header1
           <CardBody className="overflow-visible py-2">
             {tooltip !== "" ? (
               <Tooltip content={tooltip}>
-                {bodyValue}
+                <p>{bodyValue}</p>
               </Tooltip>
             ): (
               <div>

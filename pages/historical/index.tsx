@@ -31,7 +31,7 @@ interface ChartData {
 }
 
 export default function Historical() {
-    const disclaimer = "While the utmost care has been taken to compile the data displayed here, there is no guarantee that the data is up to date or accurate. This site was put together as a pet project. Please do not make financial decisions based on this data alone, and do your own research. For information on how the data was compiled, please use the tooltips (coming soon...)."
+    const disclaimer = "While the utmost care has been taken to compile the data displayed here, there is no guarantee that the data is up to date or accurate. This site was put together as a pet project. Please do not make financial decisions based on this data alone, and do your own research. For information on how the data was compiled, please use the tooltips. Calculations have been based on the minimal Djed implementation in the Djed whitepaper."
     const [data, setData] = useState<DataFormat | null>();
     const [isLoading, setIsLoading] = useState(true);
     const [chartData, setChartData] = useState<ChartData | null>();
