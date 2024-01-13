@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { CircularProgress, Tooltip } from "@nextui-org/react";
 import dynamic from 'next/dynamic';
+import Head from 'next/head';
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 import NavbarComponent from '@/components/navbar'
@@ -87,6 +88,9 @@ export default function Home() {
     
     return (
       <div>
+        <Head>
+          <title>Djed Dashboard: Overview</title>
+        </Head>
         <NavbarComponent />
         <div className="margin20">
           <div className="regular-text container padding-20">

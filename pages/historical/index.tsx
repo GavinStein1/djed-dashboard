@@ -3,6 +3,7 @@ import { Tabs, Tab, Accordion, AccordionItem, CircularProgress } from "@nextui-o
 import { TimeSeriesChart, StackedTimeSeriesChart } from "@/components/timeseries-chart";
 import { useEffect, useState } from "react";
 import * as helper from '@/script/helper';
+import Head from "next/head";
 
 interface SeriesData {
     block: number;
@@ -73,6 +74,9 @@ export default function Historical() {
 
     return (
         <div>
+            <Head>
+                <title>Djed Dashboard: Historical</title>
+            </Head>
             <NavbarComponent />
             <div className="margin20">
                 <div className="regular-text container padding-20">
