@@ -23,10 +23,15 @@ export const TimeSeriesChart: React.FC<ChartProps> = ({ xSeries, ySeries, title 
       
         series: [{
           name: title,
-          data: ySeries
+          data: ySeries,
+          color: '#424a7b'
         }],
         options: {
           chart: {
+            colors: [
+              '#424a7b',
+              '#7054d1'
+            ],
             type: 'area' as const,
             stacked: false,
             height: 500,
@@ -108,10 +113,12 @@ export const StackedTimeSeriesChart: React.FC<StackedChartProps> = ({ xSeries, y
     
       series: [{
         data: ySeriesA,
-        name: titleA
+        name: titleA,
+        color: '#424a7b'
       },{
         data: ySeriesB,
-        name: titleB
+        name: titleB,
+        color: '#7054d1'
       }],
       options: {
         chart: {

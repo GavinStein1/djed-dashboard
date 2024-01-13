@@ -90,7 +90,7 @@ export default function Home() {
         <NavbarComponent />
         <div className="margin20">
           <div className="regular-text container padding-20">
-            <p className="">{disclaimer}</p>
+            <p className="primary-color">{disclaimer}</p>
           </div>
           <div className="container">
             <div className="second-div">
@@ -152,6 +152,10 @@ function createPieChart(liabilities: number | undefined, equity: number | undefi
   var state = { 
     series: [liabilities, equity],
     options: {
+      colors: [
+        '#424a7b',
+        '#7054d1'
+      ],
       labels: ['Liabilities', 'Equity'],
       legend: {
         position: 'bottom' as const

@@ -76,10 +76,10 @@ export default function Historical() {
             <NavbarComponent />
             <div className="margin20">
                 <div className="regular-text container padding-20">
-                    <p className="">{disclaimer}</p>
+                    <p className="primary-color">{disclaimer}</p>
                 </div>
                 <div className="margin-auto">
-                    <Tabs variant="underlined" aria-label="Options">
+                    <Tabs variant="underlined" aria-label="Options" color="primary">
                         <Tab key="ADA-price" title="ADA Price">
                             {!!chartData ? (
                                 <TimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} ySeries={chartData.ada_price} title="ADA Price" />

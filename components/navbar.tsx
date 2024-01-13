@@ -24,7 +24,7 @@ export default function NavbarComponent() {
   })
   
   return (
-  <Navbar className="">
+  <Navbar className="primary-color">
     <NavbarBrand>
       <Link href="/">
         <h1 className="">DJED Dashboard</h1>
@@ -44,7 +44,7 @@ export default function NavbarComponent() {
     </NavbarContent>
     <NavbarContent justify="end">
       <NavbarItem>
-        <Button variant="solid" onClick={downloadJsonData}>
+        <Button variant="solid" className="primary-color" onClick={downloadJsonData}>
           Download data
         </Button>
       </NavbarItem>

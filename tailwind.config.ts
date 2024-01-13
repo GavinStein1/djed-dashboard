@@ -17,6 +17,17 @@ const config: Config = {
       },
     },
   },
-  plugins: [nextui()],
+  plugins: [nextui({
+    themes: {
+      light: {
+        colors: {
+          primary: {
+            DEFAULT: "#424a7b",
+            foreground: "#000000"
+          }
+        }
+      }
+    }
+  })],
 }
 export default config

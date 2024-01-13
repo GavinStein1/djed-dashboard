@@ -11,7 +11,7 @@ interface MyComponentProps {
 
 const CardComponent: React.FC<MyComponentProps> = ({ header2, bodyValue, header1, tooltip, children }) => {
     return (
-        <Card className="py-4 margin20">
+        <Card className="py-4 margin20 primary-color">
           <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
             <p className="text-tiny uppercase font-bold">{header1}</p>
             <h4 className="font-bold text-large">{header2}</h4>
