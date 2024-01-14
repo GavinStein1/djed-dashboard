@@ -21,8 +21,16 @@
 
 body {
     font-family: 'Roboto Mono', monospace;
-    height: 100vh;
 }
+
+/* .background-image {
+    background-image: url('/background1.png');
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+} */
 
 .regular-text {
     font-size: 12px;
@@ -72,4 +80,18 @@ body {
 
 .secondary-color {
     color: #7054d1;
+}
+
+.socials-container {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.standard-font {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.custom-social-button {
+    padding: 10px;
 }

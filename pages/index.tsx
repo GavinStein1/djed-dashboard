@@ -60,7 +60,6 @@ export default function Home() {
   if (isLoading) {
     return (
       <div>
-        <NavbarComponent />
         <div className="flex items-center justify-center h-screen">
           <CircularProgress label="Loading..."/>
         </div>
@@ -90,8 +89,8 @@ export default function Home() {
       <div>
         <Head>
           <title>Djed Dashboard: Overview</title>
+          <meta name="description" content="A live snapshot of the Djed protocols state on the Cardano blockchain. Metrics include ADA, Djed, and Shen price, circulating supply and reserve health." />
         </Head>
-        <NavbarComponent />
         <div className="margin20">
           <div className="regular-text container padding-20">
             <p className="primary-color">{disclaimer}</p>

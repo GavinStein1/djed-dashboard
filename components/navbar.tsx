@@ -24,21 +24,31 @@ export default function NavbarComponent() {
   })
   
   return (
-  <Navbar className="primary-color">
+  <Navbar className="primary-color" isBlurred={true}>
     <NavbarBrand>
       <Link href="/">
         <h1 className="">DJED Dashboard</h1>
       </Link>
     </NavbarBrand>
     <NavbarContent className="hidden sm:flex gap-4" justify="center">
-      <NavbarItem isActive={(pathname !== "/")}>
+      <NavbarItem isActive={(pathname === "/")}>
         <Link href="/">
           Overview
         </Link>
       </NavbarItem>
-      <NavbarItem isActive={(pathname !== "/historical")}>
+      <NavbarItem isActive={(pathname === "/historical")}>
         <Link href="/historical">
           Historical
+        </Link>
+      </NavbarItem>
+      <NavbarItem isActive={(pathname === "/djed-whitepaper")}>
+        <a href="https://eprint.iacr.org/2021/1069.pdf" target="_blank" rel="noopener noreferrer">
+          Djed Whitepaper
+        </a>
+      </NavbarItem>
+      <NavbarItem isActive={(pathname === "/about")}>
+        <Link href="/about">
+          About
         </Link>
       </NavbarItem>
     </NavbarContent>

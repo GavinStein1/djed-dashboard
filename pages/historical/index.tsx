@@ -1,6 +1,6 @@
 import NavbarComponent from "@/components/navbar";
-import { Tabs, Tab, Accordion, AccordionItem, CircularProgress } from "@nextui-org/react"
-import { TimeSeriesChart, StackedTimeSeriesChart } from "@/components/timeseries-chart";
+import { Tabs, Tab, RadioGroup, Radio, CircularProgress } from "@nextui-org/react"
+import { TimeSeriesChart, StackedTimeSeriesChart, XTimeSeriesChart } from "@/components/timeseries-chart";
 import { useEffect, useState } from "react";
 import * as helper from '@/script/helper';
 import Head from "next/head";
@@ -11,6 +11,12 @@ interface SeriesData {
     djed_reserve: number;
     shen_reserve: number;
     ada_price: number
+}
+
+interface Series {
+    name: string;
+    data: number[];
+    color: string;
 }
   
 interface DataFormat {
@@ -36,6 +42,14 @@ export default function Historical() {
     const [data, setData] = useState<DataFormat | null>();
     const [isLoading, setIsLoading] = useState(true);
     const [chartData, setChartData] = useState<ChartData | null>();
+    const [adaSelected, setAdaSelected] = useState("none");
+    const [djedSelected, setDjedSelected] = useState("none");
+    const [shenSelected, setShenSelected] = useState("none");
+    const [ratioSelected, setRatioSelected] = useState("none");
+    const [adaChartSeries, setAdaChartSeries] = useState<Series[]>([]);
+    const [djedChartSeries, setDjedChartSeries] = useState<Series[]>([]);
+    const [shenChartSeries, setShenChartSeries] = useState<Series[]>([]);
+    const [ratioChartSeries, setRatioChartSeries] = useState<Series[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -44,7 +58,28 @@ export default function Historical() {
             const firebaseJson = await fetchFirebaseData();
             const processedData = processData(firebaseJson);
             setData(processedData);
-            setChartData(splitDataSeries(processedData));
+            const tmpChartData = splitDataSeries(processedData);
+            setChartData(tmpChartData);
+            setAdaChartSeries([{
+                name: "ADA Price",
+                data: tmpChartData.ada_price,
+                color: "#424a7b"
+            }]);
+            setDjedChartSeries([{
+                name: "Djed Price",
+                data: tmpChartData.djed_price,
+                color: "#424a7b"
+            }]);
+            setShenChartSeries([{
+                name: "Shen Price",
+                data: tmpChartData.shen_price,
+                color: "#424a7b"
+            }]);
+            setRatioChartSeries([{
+                name: "Ratio",
+                data: tmpChartData.ratio,
+                color: "#424a7b"
+            }]);
             setIsLoading(false);
           } catch (error) {
             console.log(error);
@@ -56,14 +91,13 @@ export default function Historical() {
     if (isLoading) {
         return (
           <div>
-            <NavbarComponent />
             <div className="flex items-center justify-center h-screen">
               <CircularProgress label="Loading..."/>
             </div>
           </div>
         )
     } else {
-        if (!data) {
+        if (!data || !chartData) {
           return (
             <div>
               <p>no data exists</p>
@@ -72,12 +106,371 @@ export default function Historical() {
         }
     }
 
+    function onDataOverlayChange(dataSeries: string, newVal: string) {
+        if (!chartData) {
+            return;
+        }
+        console.log(newVal);
+        switch (dataSeries) {
+            case "ADA":
+                setAdaSelected(newVal);
+                switch (newVal) {
+                    case "none":
+                        setAdaChartSeries([{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#424a7b"
+                        }]);
+                        break;
+                    case "ada-price":
+                        setAdaChartSeries([{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#424a7b"
+                        }]);
+                        break;
+                    case "djed-price":
+                        setAdaChartSeries([{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "shen-price":
+                        setAdaChartSeries([{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "reserves":
+                        setAdaChartSeries([{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Reserves",
+                            data: chartData.ada_reserve,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "liabilities":
+                        setAdaChartSeries([{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Liabilities",
+                            data: chartData.liabilities,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "equity":
+                        setAdaChartSeries([{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Equity",
+                            data: chartData.equity,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "ratio":
+                        setAdaChartSeries([{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#424a7b"
+                        },{
+                            name: "RatioX",
+                            data: chartData.ratio,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    default:
+                        return;
+                };
+                break;
+            case "Djed":
+                setDjedSelected(newVal);
+                switch (newVal) {
+                    case "none":
+                        setDjedChartSeries([{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#424a7b"
+                        }]);
+                        break;
+                    case "ada-price":
+                        setDjedChartSeries([{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#424a7b"
+                        },{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "djed-price":
+                        setDjedChartSeries([{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#424a7b"
+                        }]);
+                        break;
+                    case "shen-price":
+                        setDjedChartSeries([{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "reserves":
+                        setDjedChartSeries([{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Reserves",
+                            data: chartData.ada_reserve,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "liabilities":
+                        setDjedChartSeries([{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Liabilities",
+                            data: chartData.liabilities,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "equity":
+                        setDjedChartSeries([{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Equity",
+                            data: chartData.equity,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "ratio":
+                        setDjedChartSeries([{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#424a7b"
+                        },{
+                            name: "RatioX",
+                            data: chartData.ratio,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    default:
+                        return;
+                }
+                break;
+            case "Shen":
+                setShenSelected(newVal);
+                switch (newVal) {
+                    case "none":
+                        setShenChartSeries([{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#424a7b"
+                        }]);
+                        break;
+                    case "ada-price":
+                        setShenChartSeries([{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#424a7b"
+                        },{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "djed-price":
+                        setShenChartSeries([{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "shen-price":
+                        setShenChartSeries([{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#424a7b"
+                        }]);
+                        break;
+                    case "reserves":
+                        setShenChartSeries([{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Reserves",
+                            data: chartData.ada_reserve,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "liabilities":
+                        setShenChartSeries([{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Liabilities",
+                            data: chartData.liabilities,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "equity":
+                        setShenChartSeries([{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Equity",
+                            data: chartData.equity,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "ratio":
+                        setShenChartSeries([{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#424a7b"
+                        },{
+                            name: "Ratio",
+                            data: chartData.ratio,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    default:
+                        return;
+                }
+                break;
+            case "Ratio":
+                setRatioSelected(newVal);
+                switch (newVal) {
+                    case "none":
+                        setRatioChartSeries([{
+                            name: "Ratio",
+                            data: chartData.ratio,
+                            color: "#424a7b"
+                        }]);
+                        break;
+                    case "ada-price":
+                        setRatioChartSeries([{
+                            name: "Ratio",
+                            data: chartData.ratio,
+                            color: "#424a7b"
+                        },{
+                            name: "ADA Price",
+                            data: chartData.ada_price,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "djed-price":
+                        setRatioChartSeries([{
+                            name: "Ratio",
+                            data: chartData.ratio,
+                            color: "#424a7b"
+                        },{
+                            name: "Djed Price",
+                            data: chartData.djed_price,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "shen-price":
+                        setRatioChartSeries([{
+                            name: "Ratio",
+                            data: chartData.ratio,
+                            color: "#424a7b"
+                        },{
+                            name: "Shen Price",
+                            data: chartData.shen_price,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "reserves":
+                        setRatioChartSeries([{
+                            name: "Ratio",
+                            data: chartData.ratio,
+                            color: "#424a7b"
+                        },{
+                            name: "Reserves",
+                            data: chartData.ada_reserve,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "liabilities":
+                        setRatioChartSeries([{
+                            name: "Ratio",
+                            data: chartData.ratio,
+                            color: "#424a7b"
+                        },{
+                            name: "Liabilities",
+                            data: chartData.liabilities,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "equity":
+                        setRatioChartSeries([{
+                            name: "Ratio",
+                            data: chartData.ratio,
+                            color: "#424a7b"
+                        },{
+                            name: "Equity",
+                            data: chartData.equity,
+                            color: "#7054d1"
+                        }]);
+                        break;
+                    case "ratio":
+                        setRatioChartSeries([{
+                            name: "Ratio",
+                            data: chartData.ratio,
+                            color: "#424a7b"
+                        }]);
+                        break;
+                    default:
+                        return;
+                }
+                break;
+            default:
+                return;
+        }
+    }
+
     return (
         <div>
             <Head>
                 <title>Djed Dashboard: Historical</title>
+                <meta name="description" content="A historical perspecitve of the Djed protocol's state. Metrics include ADA, Djed, and Shen price, circulating supply and reserve health." />
             </Head>
-            <NavbarComponent />
             <div className="margin20">
                 <div className="regular-text container padding-20">
                     <p className="primary-color">{disclaimer}</p>
@@ -86,7 +479,43 @@ export default function Historical() {
                     <Tabs variant="underlined" aria-label="Options" color="primary">
                         <Tab key="ADA-price" title="ADA Price">
                             {!!chartData ? (
-                                <TimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} ySeries={chartData.ada_price} title="ADA Price" />
+                                <div>
+                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={adaChartSeries} />
+                                    <RadioGroup 
+                                        label="Overlay data: "
+                                        orientation="horizontal"
+                                        value={adaSelected}
+                                        onValueChange={(newVal) => {
+                                            onDataOverlayChange("ADA", newVal);
+                                        }}
+                                        className="regular-text"
+                                    >
+                                        <Radio value="none">
+                                            <p className="regular-text primary-color">None</p>
+                                        </Radio>
+                                        <Radio value="ada-price">
+                                            <p className="regular-text primary-color">ADA Price</p>
+                                        </Radio>
+                                        <Radio value="djed-price">
+                                            <p className="regular-text primary-color">Djed Price</p>
+                                        </Radio>
+                                        <Radio value="shen-price">
+                                            <p className="regular-text primary-color">Shen Price</p>
+                                        </Radio>
+                                        <Radio value="reserves">
+                                            <p className="regular-text primary-color">Reserves</p>
+                                        </Radio>
+                                        <Radio value="liabilities">
+                                            <p className="regular-text primary-color">Liabilities</p>
+                                        </Radio>
+                                        <Radio value="equity">
+                                            <p className="regular-text primary-color">Equity</p>
+                                        </Radio>
+                                        <Radio value="ratio">
+                                            <p className="regular-text primary-color">Ratio</p>
+                                        </Radio>
+                                    </RadioGroup>
+                                </div>
                             ) : (
                                 <div>
                                     <p>No chart data</p>
@@ -95,7 +524,43 @@ export default function Historical() {
                         </Tab>
                         <Tab key="Djed-price" title="Djed Price">
                             {!!chartData ? (
-                                <TimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} ySeries={chartData.djed_price} title="Djed Price" />
+                                <div>
+                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={djedChartSeries} />
+                                    <RadioGroup 
+                                        label="Overlay data: "
+                                        orientation="horizontal"
+                                        value={djedSelected}
+                                        onValueChange={(newVal) => {
+                                            onDataOverlayChange("Djed", newVal);
+                                        }}
+                                        className="regular-text"
+                                    >
+                                        <Radio value="none">
+                                            <p className="regular-text primary-color">None</p>
+                                        </Radio>
+                                        <Radio value="ada-price">
+                                            <p className="regular-text primary-color">ADA Price</p>
+                                        </Radio>
+                                        <Radio value="djed-price">
+                                            <p className="regular-text primary-color">Djed Price</p>
+                                        </Radio>
+                                        <Radio value="shen-price">
+                                            <p className="regular-text primary-color">Shen Price</p>
+                                        </Radio>
+                                        <Radio value="reserves">
+                                            <p className="regular-text primary-color">Reserves</p>
+                                        </Radio>
+                                        <Radio value="liabilities">
+                                            <p className="regular-text primary-color">Liabilities</p>
+                                        </Radio>
+                                        <Radio value="equity">
+                                            <p className="regular-text primary-color">Equity</p>
+                                        </Radio>
+                                        <Radio value="ratio">
+                                            <p className="regular-text primary-color">Ratio</p>
+                                        </Radio>
+                                    </RadioGroup>
+                                </div>
                             ) : (
                                 <div>
                                     <p>No chart data</p>
@@ -104,7 +569,43 @@ export default function Historical() {
                         </Tab>
                         <Tab key="Shen-price" title="Shen Price">
                             {!!chartData ? (
-                                <TimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} ySeries={chartData.shen_price} title="Shen Price" />
+                                <div>
+                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={shenChartSeries} />
+                                    <RadioGroup 
+                                        label="Overlay data: "
+                                        orientation="horizontal"
+                                        value={shenSelected}
+                                        onValueChange={(newVal) => {
+                                            onDataOverlayChange("Shen", newVal);
+                                        }}
+                                        className="regular-text"
+                                    >
+                                        <Radio value="none">
+                                            <p className="regular-text primary-color">None</p>
+                                        </Radio>
+                                        <Radio value="ada-price">
+                                            <p className="regular-text primary-color">ADA Price</p>
+                                        </Radio>
+                                        <Radio value="djed-price">
+                                            <p className="regular-text primary-color">Djed Price</p>
+                                        </Radio>
+                                        <Radio value="shen-price">
+                                            <p className="regular-text primary-color">Shen Price</p>
+                                        </Radio>
+                                        <Radio value="reserves">
+                                            <p className="regular-text primary-color">Reserves</p>
+                                        </Radio>
+                                        <Radio value="liabilities">
+                                            <p className="regular-text primary-color">Liabilities</p>
+                                        </Radio>
+                                        <Radio value="equity">
+                                            <p className="regular-text primary-color">Equity</p>
+                                        </Radio>
+                                        <Radio value="ratio">
+                                            <p className="regular-text primary-color">Ratio</p>
+                                        </Radio>
+                                    </RadioGroup>
+                                </div>
                             ) : (
                                 <div>
                                     <p>No chart data</p>
@@ -122,7 +623,43 @@ export default function Historical() {
                         </Tab>
                         <Tab key="Ratio" title="Ratio">
                         {!!chartData ? (
-                                <TimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} ySeries={chartData.ratio} title="Ratio" />
+                                <div>
+                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={ratioChartSeries} />
+                                    <RadioGroup 
+                                        label="Overlay data: "
+                                        orientation="horizontal"
+                                        value={ratioSelected}
+                                        onValueChange={(newVal) => {
+                                            onDataOverlayChange("Ratio", newVal);
+                                        }}
+                                        className="regular-text"
+                                    >
+                                        <Radio value="none">
+                                            <p className="regular-text primary-color">None</p>
+                                        </Radio>
+                                        <Radio value="ada-price">
+                                            <p className="regular-text primary-color">ADA Price</p>
+                                        </Radio>
+                                        <Radio value="djed-price">
+                                            <p className="regular-text primary-color">Djed Price</p>
+                                        </Radio>
+                                        <Radio value="shen-price">
+                                            <p className="regular-text primary-color">Shen Price</p>
+                                        </Radio>
+                                        <Radio value="reserves">
+                                            <p className="regular-text primary-color">Reserves</p>
+                                        </Radio>
+                                        <Radio value="liabilities">
+                                            <p className="regular-text primary-color">Liabilities</p>
+                                        </Radio>
+                                        <Radio value="equity">
+                                            <p className="regular-text primary-color">Equity</p>
+                                        </Radio>
+                                        <Radio value="ratio">
+                                            <p className="regular-text primary-color">Ratio</p>
+                                        </Radio>
+                                    </RadioGroup>
+                                </div>
                             ) : (
                                 <div>
                                     <p>No chart data</p>
