@@ -8,8 +8,8 @@ const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 import NavbarComponent from '@/components/navbar'
 import CardComponent from '@/components/card'
-import * as helper from '@/script/helper';
-import Tooltips from '@/script/tooltips';
+import * as helper from '@/scripts/helper';
+import Tooltips from '@/scripts/tooltips';
 
 interface SeriesData {
   block: number;
@@ -95,8 +95,8 @@ export default function Home() {
           <div className="regular-text container padding-20">
             <p className="primary-color">{disclaimer}</p>
           </div>
-          <div className="container">
-            <div className="second-div">
+          <div className="grid grid-cols-3">
+            <div className="">
               <CardComponent header1='' header2='ADA' bodyValue={"$" + formatCurrency.format(adaPrice)} tooltip={Tooltips.adaCard}>
                 <div></div>
               </CardComponent>
@@ -109,22 +109,22 @@ export default function Home() {
                 <p className="child-padding">{formatCurrency.format(circulatingShen)}</p>
               </CardComponent>
             </div>
-            <div className="first-div">
-              <div className="grid grid-cols-2">
-                {createPieChart(liabilities, equity)}
-                <CardComponent header2="Reserve Health" header1="" bodyValue={String((ratio*100).toFixed(0)) + "%"} tooltip={Tooltips.ratio}>
-                  <p className="bold">Reserves</p>
-                  <p className="child-padding">{"₳" + formatCurrency.format(reserve)}</p>
-                  <p className="bold">Liabilities</p>
-                  <Tooltip content={Tooltips.liabilities}>
-                    <p className="child-padding">{"₳" + formatCurrency.format(liabilities)}</p>
-                  </Tooltip>
-                  <p className="bold">Equity</p>
-                  <Tooltip content={Tooltips.equity}>
-                    <p className="child-padding">{"₳" + formatCurrency.format(equity)}</p>
-                  </Tooltip>
-                </CardComponent>
-              </div>
+            <div className="">
+              {createPieChart(liabilities, equity)}
+            </div>
+            <div>
+              <CardComponent header2="Reserve Health" header1="" bodyValue={String((ratio*100).toFixed(0)) + "%"} tooltip={Tooltips.ratio}>
+                <p className="bold">Reserves</p>
+                <p className="child-padding">{"₳" + formatCurrency.format(reserve)}</p>
+                <p className="bold">Liabilities</p>
+                <Tooltip content={Tooltips.liabilities}>
+                  <p className="child-padding">{"₳" + formatCurrency.format(liabilities)}</p>
+                </Tooltip>
+                <p className="bold">Equity</p>
+                <Tooltip content={Tooltips.equity}>
+                  <p className="child-padding">{"₳" + formatCurrency.format(equity)}</p>
+                </Tooltip>
+              </CardComponent>
             </div>
           </div>
         </div>
@@ -179,7 +179,7 @@ function createPieChart(liabilities: number | undefined, equity: number | undefi
           options={state.options}
           series={state.series}
           type="pie"
-          height="100%"
+          height="500px"
         />
       }
     </div>

@@ -10,7 +10,7 @@ import Link from "next/link";
 
 export default function About() {
 
-    const mediumURL = "https://medium.com/@gavin.stein1";
+    const mediumURL = "https://medium.com/@gavin.stein1/data-insights-for-the-djed-stablecoin-86231f27cc81";
     const githubURL = "https://github.com/GavinStein1/djed-dashboard";
     const linkedInURL = "https://www.linkedin.com/in/gavin-stein/";
 
@@ -23,8 +23,8 @@ export default function About() {
         (
             <div>
                 <Head>
-                    <title>Djed Dashboard: Overview</title>
-                    <meta name="description" content="A live snapshot of the Djed protocols state on the Cardano blockchain. Metrics include ADA, Djed, and Shen price, circulating supply and reserve health." />
+                    <title>Djed Dashboard: About</title>
+                    <meta name="description" content="A live and historical snapshot of the Djed protocols state on the Cardano blockchain. This page is about this project." />
                 </Head>
                 <div className="container regular-text margin20">
                     <p className="primary-color padding-20">{aboutText}</p>

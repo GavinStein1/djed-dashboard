@@ -2,7 +2,7 @@ import NavbarComponent from "@/components/navbar";
 import { Tabs, Tab, RadioGroup, Radio, CircularProgress } from "@nextui-org/react"
 import { TimeSeriesChart, StackedTimeSeriesChart, XTimeSeriesChart } from "@/components/timeseries-chart";
 import { useEffect, useState } from "react";
-import * as helper from '@/script/helper';
+import * as helper from '@/scripts/helper';
 import Head from "next/head";
 
 interface SeriesData {

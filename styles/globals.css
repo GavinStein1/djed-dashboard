@@ -46,18 +46,6 @@ body {
     display: flex;
 }
 
-.first-div {
-    flex: 3; /* 75% width */
-    /* background-color: lightblue; */
-    padding: 20px 0px 20px 20px;
-}
-
-.second-div {
-    flex: 1; /* 20% width */
-    /* background-color: lightgreen; */
-    padding: 20px;
-}
-
 .padding-20 {
     padding: 20px;
 }
