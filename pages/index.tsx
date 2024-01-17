@@ -29,6 +29,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const [liveAdaPrice, setLiveAdaPrice] = useState<number>();
+  const [isMobile, setIsMobile] = useState(false);
 
   const disclaimer = "While the utmost care has been taken to compile the data displayed here, there is no guarantee that the data is up to date or accurate. This site was put together as a pet project. Please do not make financial decisions based on this data alone, and do your own research. For information on how the data was compiled, please use the tooltips. Calculations have been based on the minimal Djed implementation in the Djed whitepaper."
 
@@ -55,7 +56,24 @@ export default function Home() {
         console.log(error);
       }
     }
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      console.log(window.innerWidth);
+    };
+
     fetchData();
+
+    // Initial check
+    handleResize();
+
+    // Listen for window resize events
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
   if (isLoading) {
     return (
@@ -91,43 +109,82 @@ export default function Home() {
           <title>Djed Dashboard: Overview</title>
           <meta name="description" content="A live snapshot of the Djed protocols state on the Cardano blockchain. Metrics include ADA, Djed, and Shen price, circulating supply and reserve health." />
         </Head>
-        <div className="margin20">
-          <div className="regular-text container padding-20">
-            <p className="primary-color">{disclaimer}</p>
-          </div>
-          <div className="grid grid-cols-3">
-            <div className="">
-              <CardComponent header1='' header2='ADA' bodyValue={"$" + formatCurrency.format(adaPrice)} tooltip={Tooltips.adaCard}>
-                <div></div>
-              </CardComponent>
-              <CardComponent header1='' header2='Djed' bodyValue={"₳" + formatCurrency.format(djedPrice)} tooltip={Tooltips.djedCard}>
-                <p>Circulating</p>
-                <p className="child-padding">{formatCurrency.format(circulatingDjed)}</p>
-              </CardComponent>
-              <CardComponent header1='' header2='Shen' bodyValue={"₳" + formatCurrency.format(shenPrice)} tooltip={Tooltips.shenCard}>
-                <p>Circulating</p>
-                <p className="child-padding">{formatCurrency.format(circulatingShen)}</p>
-              </CardComponent>
+        {isMobile ? (
+          <div>
+            <div className="regular-text container padding-20">
+              <p className="primary-color">{disclaimer}</p>
             </div>
             <div className="">
-              {createPieChart(liabilities, equity)}
+                <CardComponent header1='' header2='ADA' bodyValue={"$" + formatCurrency.format(adaPrice)} tooltip={Tooltips.adaCard}>
+                  <div></div>
+                </CardComponent>
+                <CardComponent header1='' header2='Djed' bodyValue={"₳" + formatCurrency.format(djedPrice)} tooltip={Tooltips.djedCard}>
+                  <p>Circulating</p>
+                  <p className="child-padding">{formatCurrency.format(circulatingDjed)}</p>
+                </CardComponent>
+                <CardComponent header1='' header2='Shen' bodyValue={"₳" + formatCurrency.format(shenPrice)} tooltip={Tooltips.shenCard}>
+                  <p>Circulating</p>
+                  <p className="child-padding">{formatCurrency.format(circulatingShen)}</p>
+                </CardComponent>
+              </div>
+              <div className="">
+                {createPieChart(liabilities, equity)}
+              </div>
+              <div>
+                <CardComponent header2="Reserve Health" header1="" bodyValue={String((ratio*100).toFixed(0)) + "%"} tooltip={Tooltips.ratio}>
+                  <p className="bold">Reserves</p>
+                  <p className="child-padding">{"₳" + formatCurrency.format(reserve)}</p>
+                  <p className="bold">Liabilities</p>
+                  <Tooltip content={Tooltips.liabilities}>
+                    <p className="child-padding">{"₳" + formatCurrency.format(liabilities)}</p>
+                  </Tooltip>
+                  <p className="bold">Equity</p>
+                  <Tooltip content={Tooltips.equity}>
+                    <p className="child-padding">{"₳" + formatCurrency.format(equity)}</p>
+                  </Tooltip>
+                </CardComponent>
+              </div>
+          </div>
+        ) : (
+          <div className="margin20">
+            <div className="regular-text container padding-20">
+              <p className="primary-color">{disclaimer}</p>
             </div>
-            <div>
-              <CardComponent header2="Reserve Health" header1="" bodyValue={String((ratio*100).toFixed(0)) + "%"} tooltip={Tooltips.ratio}>
-                <p className="bold">Reserves</p>
-                <p className="child-padding">{"₳" + formatCurrency.format(reserve)}</p>
-                <p className="bold">Liabilities</p>
-                <Tooltip content={Tooltips.liabilities}>
-                  <p className="child-padding">{"₳" + formatCurrency.format(liabilities)}</p>
-                </Tooltip>
-                <p className="bold">Equity</p>
-                <Tooltip content={Tooltips.equity}>
-                  <p className="child-padding">{"₳" + formatCurrency.format(equity)}</p>
-                </Tooltip>
-              </CardComponent>
+            <div className="grid grid-cols-3">
+              <div className="">
+                <CardComponent header1='' header2='ADA' bodyValue={"$" + formatCurrency.format(adaPrice)} tooltip={Tooltips.adaCard}>
+                  <div></div>
+                </CardComponent>
+                <CardComponent header1='' header2='Djed' bodyValue={"₳" + formatCurrency.format(djedPrice)} tooltip={Tooltips.djedCard}>
+                  <p>Circulating</p>
+                  <p className="child-padding">{formatCurrency.format(circulatingDjed)}</p>
+                </CardComponent>
+                <CardComponent header1='' header2='Shen' bodyValue={"₳" + formatCurrency.format(shenPrice)} tooltip={Tooltips.shenCard}>
+                  <p>Circulating</p>
+                  <p className="child-padding">{formatCurrency.format(circulatingShen)}</p>
+                </CardComponent>
+              </div>
+              <div className="">
+                {createPieChart(liabilities, equity)}
+              </div>
+              <div>
+                <CardComponent header2="Reserve Health" header1="" bodyValue={String((ratio*100).toFixed(0)) + "%"} tooltip={Tooltips.ratio}>
+                  <p className="bold">Reserves</p>
+                  <p className="child-padding">{"₳" + formatCurrency.format(reserve)}</p>
+                  <p className="bold">Liabilities</p>
+                  <Tooltip content={Tooltips.liabilities}>
+                    <p className="child-padding">{"₳" + formatCurrency.format(liabilities)}</p>
+                  </Tooltip>
+                  <p className="bold">Equity</p>
+                  <Tooltip content={Tooltips.equity}>
+                    <p className="child-padding">{"₳" + formatCurrency.format(equity)}</p>
+                  </Tooltip>
+                </CardComponent>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+        
       </div>
     )
   }

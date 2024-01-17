@@ -9,57 +9,116 @@ import {
     NavbarMenu,  
     NavbarMenuItem
   } from "@nextui-org/react";
-import Link from "next/link";
-import { Button } from "@nextui-org/react";
+// import Link from "next/link";
+import { Button, Link } from "@nextui-org/react";
 import { useEffect, useState} from "react";
 
 
 export default function NavbarComponent() {
   const [pathname, setPathname] = useState("");
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const menuItems = [
+    "Home",
+    "Historical",
+    "About",
+    "Whitepaper"
+  ]
+
+  const menuItemsHref = [
+    "/",
+    "/historical",
+    "/about",
+    "https://eprint.iacr.org/2021/1069.pdf"
+  ]
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const tmp_pathname = window.location.pathname;
       setPathname(tmp_pathname);
     }
-  })
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Initial check
+    handleResize();
+
+    // Listen for window resize events
+    window.addEventListener('resize', handleResize);
+    setIsMenuOpen(false);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
   
   return (
-  <Navbar className="primary-color" isBlurred={true}>
-    <NavbarBrand>
-      <Link href="/">
-        <h1 className="">DJED Dashboard</h1>
-      </Link>
-    </NavbarBrand>
-    <NavbarContent className="hidden sm:flex gap-4" justify="center">
-      <NavbarItem isActive={(pathname === "/")}>
-        <Link href="/">
-          Overview
-        </Link>
-      </NavbarItem>
-      <NavbarItem isActive={(pathname === "/historical")}>
-        <Link href="/historical">
-          Historical
-        </Link>
-      </NavbarItem>
-      <NavbarItem isActive={(pathname === "/djed-whitepaper")}>
-        <a href="https://eprint.iacr.org/2021/1069.pdf" target="_blank" rel="noopener noreferrer">
-          Djed Whitepaper
-        </a>
-      </NavbarItem>
-      <NavbarItem isActive={(pathname === "/about")}>
-        <Link href="/about">
-          About
-        </Link>
-      </NavbarItem>
-    </NavbarContent>
-    <NavbarContent justify="end">
-      <NavbarItem>
-        <Button variant="solid" className="primary-color" onClick={downloadJsonData}>
-          Download data
-        </Button>
-      </NavbarItem>
-    </NavbarContent>
-  </Navbar>
+    <Navbar onMenuOpenChange={setIsMenuOpen}>
+      <NavbarContent>
+        <NavbarMenuToggle
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          className="sm:hidden"
+        />
+        <NavbarBrand>
+          <Link href="/">
+            <h1 className="">DJED Dashboard</h1>
+          </Link>
+        </NavbarBrand>
+      </NavbarContent>
+      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        <NavbarItem isActive={(pathname === "/")}>
+          <Link href="/">
+            Overview
+          </Link>
+        </NavbarItem>
+        <NavbarItem isActive={(pathname === "/historical")}>
+          <Link href="/historical">
+            Historical
+          </Link>
+        </NavbarItem>
+        <NavbarItem className="primary-color" isActive={(pathname === "/djed-whitepaper")}>
+          <a href="https://eprint.iacr.org/2021/1069.pdf" target="_blank" rel="noopener noreferrer">
+            Djed Whitepaper
+          </a>
+        </NavbarItem>
+        <NavbarItem isActive={(pathname === "/about")}>
+          <Link href="/about">
+            About
+          </Link>
+        </NavbarItem>
+      </NavbarContent>
+      <NavbarContent justify="end">
+        <NavbarItem>
+          <Button variant="solid" className="primary-color" onClick={downloadJsonData}>
+            Download data
+          </Button>
+        </NavbarItem>
+      </NavbarContent>
+      <NavbarMenu>
+        {menuItems.map((item, index) => (
+          <NavbarMenuItem key={`${item}-${index}`}>
+            {item === "Whitepaper" ? (
+              <a href="https://eprint.iacr.org/2021/1069.pdf" target="_blank" rel="noopener noreferrer">
+                <p className="primary-color menu-item-font">Djed Whitepaper</p>
+              </a>
+            ) : (
+              <Link
+                color={
+                  "primary"
+                }
+                className="w-full"
+                href={menuItemsHref[index]}
+                >
+                {item}
+              </Link>
+            )}
+          </NavbarMenuItem>
+        ))}
+      </NavbarMenu>
+    </Navbar>
   )
 }
 
