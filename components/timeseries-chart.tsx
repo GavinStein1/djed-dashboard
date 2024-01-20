@@ -3,12 +3,6 @@ import React from "react";
 import dynamic from 'next/dynamic';
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
-interface ChartProps {
-  xSeries: string[];
-  ySeries: number[];
-  title: string;
-}
-
 interface Series {
   name: string;
   data: number[];
@@ -27,96 +21,6 @@ interface StackedChartProps {
   title: string;
   titleA: string;
   titleB: string;
-}
-
-export const TimeSeriesChart: React.FC<ChartProps> = ({ xSeries, ySeries, title }) => {    
-    const state = {
-      
-        series: [{
-          name: title,
-          data: ySeries,
-          color: '#424a7b'
-        }],
-        options: {
-          chart: {
-            colors: [
-              '#424a7b',
-              '#7054d1'
-            ],
-            type: 'area' as const,
-            stacked: false,
-            height: 500,
-            zoom: {
-              type: 'x' as const,
-              enabled: true,
-              autoScaleYaxis: true
-            },
-            toolbar: {
-              autoSelected: 'zoom' as const
-            }
-          },
-          dataLabels: {
-            enabled: false
-          },
-          markers: {
-            size: 0
-          },
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shadeIntensity: 0.5,
-              inverseColors: true,
-              opacityFrom: 0.5,
-              opacityTo: 0,
-              stops: [0, 90, 100]
-            },
-          },
-          yaxis: {
-            labels: {
-              formatter: function (val: number) {
-                if (val < 1000) {
-                    return val.toFixed(3);
-                } else if (val < 100000) {
-                    return val.toFixed(2);
-                } else {
-                    return val.toFixed(0);
-                }
-              },
-            },
-            title: {
-              text: title
-            },
-          },
-          xaxis: {
-            type: 'datetime' as const,
-            categories: xSeries,
-          },
-          tooltip: {
-            shared: false,
-            y: {
-              formatter: function (val: number) {
-                if (val < 1000) {
-                    return val.toFixed(3);
-                } else if (val < 100000) {
-                    return val.toFixed(2);
-                } else {
-                    return val.toFixed(0);
-                }
-              }
-            }
-          },
-          stroke: {
-            curve: 'straight' as const
-          }
-        },
-      
-      
-      };
-    return (
-        <div id="chart">
-            <Chart options={state.options} series={state.series} type="area" height={500} />
-        </div>
-    )
 }
 
 // Component enables 1 or 2 Y series with multiple Y axes.
@@ -153,6 +57,7 @@ export const XTimeSeriesChart: React.FC<XChartProps> = ({ xSeries, series}) => {
             }
           }
         },
+        seriesName: series[0].name,
         title: {
           text: series[0].name,
           style: {
@@ -190,7 +95,7 @@ export const XTimeSeriesChart: React.FC<XChartProps> = ({ xSeries, series}) => {
           }
         }
       }
-    ]
+    ];
   } else {
     yaxis = {
       axisTicks: {

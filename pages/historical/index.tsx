@@ -1,7 +1,8 @@
 import NavbarComponent from "@/components/navbar";
-import { Tabs, Tab, RadioGroup, Radio, CircularProgress } from "@nextui-org/react"
-import { TimeSeriesChart, StackedTimeSeriesChart, XTimeSeriesChart } from "@/components/timeseries-chart";
+import { Tabs, Tab, RadioGroup, Radio, CircularProgress, Switch } from "@nextui-org/react"
+import { StackedTimeSeriesChart, XTimeSeriesChart } from "@/components/timeseries-chart";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import * as helper from '@/scripts/helper';
 import Head from "next/head";
 
@@ -50,15 +51,18 @@ export default function Historical() {
     const [djedChartSeries, setDjedChartSeries] = useState<Series[]>([]);
     const [shenChartSeries, setShenChartSeries] = useState<Series[]>([]);
     const [ratioChartSeries, setRatioChartSeries] = useState<Series[]>([]);
+    const [isUSD, setIsUSD] = useState<boolean>(false);
+    const router = useRouter();
 
     useEffect(() => {
+        setIsUSD(router.query.isusd === "true");
         const fetchData = async () => {
           try {
             // Get Firebase Realtime Database data
             const firebaseJson = await fetchFirebaseData();
             const processedData = processData(firebaseJson);
             setData(processedData);
-            const tmpChartData = splitDataSeries(processedData);
+            const tmpChartData = splitDataSeries(processedData, (router.query.isusd === "true"));
             setChartData(tmpChartData);
             setAdaChartSeries([{
                 name: "ADA Price",
@@ -84,9 +88,13 @@ export default function Historical() {
           } catch (error) {
             console.log(error);
           }
+          setAdaSelected("none");
+          setDjedSelected("none");
+          setShenSelected("none");
+          setRatioSelected("none");
         }
         fetchData();
-    }, []);
+    }, [router.query]);
     
     if (isLoading) {
         return (
@@ -475,12 +483,24 @@ export default function Historical() {
                 <div className="regular-text container padding-20">
                     <p className="primary-color">{disclaimer}</p>
                 </div>
+                <div className="align-right primary-color">
+                    <Switch isSelected={isUSD} onChange={() => {
+                        if (isUSD) {
+                            router.push("/historical");
+                        } else {
+                            router.push("/historical?isusd=true");
+                        }
+                        
+                    }}>
+                        <p className="primary-color">$USD</p>
+                    </Switch>
+                </div>
                 <div className="margin-auto">
                     <Tabs variant="underlined" aria-label="Options" color="primary">
                         <Tab key="ADA-price" title="ADA Price">
                             {!!chartData ? (
                                 <div>
-                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={adaChartSeries} />
+                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={adaChartSeries}/>
                                     <RadioGroup 
                                         label="Overlay data: "
                                         orientation="horizontal"
@@ -525,7 +545,7 @@ export default function Historical() {
                         <Tab key="Djed-price" title="Djed Price">
                             {!!chartData ? (
                                 <div>
-                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={djedChartSeries} />
+                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={djedChartSeries}/>
                                     <RadioGroup 
                                         label="Overlay data: "
                                         orientation="horizontal"
@@ -570,7 +590,7 @@ export default function Historical() {
                         <Tab key="Shen-price" title="Shen Price">
                             {!!chartData ? (
                                 <div>
-                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={shenChartSeries} />
+                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={shenChartSeries}/>
                                     <RadioGroup 
                                         label="Overlay data: "
                                         orientation="horizontal"
@@ -624,7 +644,7 @@ export default function Historical() {
                         <Tab key="Ratio" title="Ratio">
                         {!!chartData ? (
                                 <div>
-                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={ratioChartSeries} />
+                                    <XTimeSeriesChart xSeries={helper.convertUnixTimestampsToDateStrings(chartData.x)} series={ratioChartSeries}/>
                                     <RadioGroup 
                                         label="Overlay data: "
                                         orientation="horizontal"
@@ -686,7 +706,7 @@ function processData(json_data: Record<number, SeriesData>): DataFormat {
     return {x: data_list_x, y: data_list_y};
 }
 
-function splitDataSeries(data: DataFormat): ChartData {
+function splitDataSeries(data: DataFormat, isUSDValue: boolean): ChartData {
 
     var i = 0;
     var chartData: ChartData = {
@@ -722,6 +742,14 @@ function splitDataSeries(data: DataFormat): ChartData {
         equity = helper.calculateEquity(liabilities, reserve);
         shenPrice = helper.rcPrice(data.y[i].shen_reserve, equity);
         ratio = helper.calculateRatio(reserve, liabilities);
+
+        if (isUSDValue) {
+            djedPrice = djedPrice * adaPrice;
+            shenPrice = shenPrice * adaPrice;
+            reserve = reserve * adaPrice;
+            liabilities = liabilities * adaPrice;
+            equity = equity * adaPrice;
+        }
         
         chartData.x.push(data.x[i]);
         chartData.ada_price.push(adaPrice);

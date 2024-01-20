@@ -87,3 +87,7 @@ body {
 .menu-item-font {
     font-size: 16px;
 }
+
+.align-right {
+    text-align: right;
+}
