@@ -59,7 +59,7 @@ export default function Home() {
 
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
-      console.log(window.innerWidth);
+      // console.log(window.innerWidth);
     };
 
     fetchData();
